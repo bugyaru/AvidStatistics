@@ -125,8 +125,6 @@ public class AvidStatistics {
                 res = engineJS.eval(replaceLogic(boolleanEval));
                 if (res == null || (Boolean) res) {
                     reportIndexes.add(ix);
-                    commandlogic(act, cmd);
-                    notifylogic(act, ntf, Q.wfData.get(ix));
                 }
             }
             try {
@@ -179,130 +177,7 @@ public class AvidStatistics {
         }
         return out;
     }
-
-    static private void notifylogic(JSONObject act, notify ntf, HashMap wfDt) throws TransformerConfigurationException, TransformerException, FileNotFoundException {
-        try {
-            StreamSource source;
-            StreamSource stylesource;
-            JSONObject ntfcfg = null;
-            JSONArray ntfcfga = null;
-            source = new StreamSource(new ByteArrayInputStream(createXmlfromObject(wfDt).getBytes()));
-            stylesource = new StreamSource("./oneWFtemplate.xsl");
-            StringWriter writer = new StringWriter();
-            TransformerFactory factory = TransformerFactory.newInstance();
-            Transformer transformer = factory.newTransformer(stylesource);
-            StreamResult result = new StreamResult(writer);
-            transformer.transform(source, result);
-            String xml = writer.toString();
-            int ntfCount = 1;
-            if ("org.json.JSONObject".equals(act.get("notify").getClass().getCanonicalName())) {
-                ntfcfg = act.getJSONObject("notify");
-            } else {
-                ntfcfga = act.getJSONArray("notify");
-                ntfCount = ntfcfga.length();
-            }
-            for (int ii = 0; ii < ntfCount; ii++) {
-                if ("org.json.JSONArray".equals(act.get("notify").getClass().getCanonicalName())) {
-                    ntfcfg = ntfcfga.getJSONObject(ii);
-                }
-                ntf.setType(ntfcfg.getString("type"));
-                if (ntf.getType().equals("mail")) {
-                    ntf.setMail(ntfcfg.getString("sendto"),
-                            ntfcfg.getString("recepient"),
-                            replaceBodyTag(ntfcfg.getString("subject"), wfDt),
-                            replaceBodyTag(ntfcfg.getString("content"), wfDt)
-                    );
-                    //ntf.sendNotify();
-                }
-                if (ntf.getType().equals("xml")) {
-                    String outPath = "./";
-                    try {
-                        outPath = ntfcfg.getString("outpath");
-                    } catch (JSONException e) {
-                    }
-                    String xslt = "";
-                    try {
-                        xslt = ntfcfg.getString("xslt");
-                    } catch (JSONException e) {
-                    }
-                    String filename = "";
-                    try {
-                        filename = ntfcfg.getString("filename");
-                    } catch (JSONException e) {
-                    }
-                    String fullpachregex = "";
-                    String[] reg;
-                    try {
-                        fullpachregex = ntfcfg.getString("fullpachregex");
-                    } catch (JSONException e) {
-                    }
-                    String fullpachreplacement = "";
-                    String[] rep;
-                    try {
-                        fullpachreplacement = ntfcfg.getString("fullpachreplacement");
-                    } catch (JSONException e) {
-                    }
-                    reg = fullpachregex.split("|");
-                    rep = fullpachreplacement.split("|");
-                    String fullName = replaceBodyTag(outPath + filename, wfDt);
-                    for (int i = 0; i < reg.length; i++) {
-                        try {
-                            String repl = "";
-                            if (!"".equals(rep[i])) {
-                                repl = rep[i];
-                            }
-                            fullName = fullName.replaceAll(reg[i], repl);
-                        } catch (Exception e) {
-                        }
-                    }
-                    if (!"".equals(fullName)) {
-                        if (!"".equals(xslt) && new File(xslt).exists()) {
-                            source = new StreamSource(new ByteArrayInputStream(xml.getBytes()));
-                            stylesource = new StreamSource(xslt);
-                            writer = new StringWriter();
-                            factory = TransformerFactory.newInstance();
-                            factory.newTransformer(stylesource);
-                            result = new StreamResult(fullName);
-                            transformer.transform(source, result);
-                        } else {
-                            try (PrintStream out = new PrintStream(new FileOutputStream(fullName))) {
-                                out.print(xml);
-                            } catch (Exception e) {
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (JSONException e) {
-        }
-
-    }
-
-    static private void commandlogic(JSONObject act, command cmd) {
-        try {
-            JSONObject cmdcfg = null;
-            JSONArray cmdcfga = null;
-            int cmdCount = 1;
-            if ("org.json.JSONObject".equals(act.get("command").getClass().getCanonicalName())) {
-                cmdcfg = act.getJSONObject("command");
-            } else {
-                cmdcfga = act.getJSONArray("command");
-                cmdCount = cmdcfga.length();
-            }
-            for (int ii = 0; ii < cmdCount; ii++) {
-                if ("org.json.JSONArray".equals(act.get("command").getClass().getCanonicalName())) {
-                    cmdcfg = cmdcfga.getJSONObject(ii);
-                }
-                cmd.setType(cmdcfg.getString("type"));
-                if (cmd.getType().equals("exec")) {
-                }
-                if (cmd.getType().equals("script")) {
-                }
-            }
-        } catch (JSONException e) {
-        }
-    }
-
+    
     static private void querylogic(JSONObject gen, JSONObject act, SOAPquery Q) throws UnsupportedEncodingException {
         String SOAPVarNameact = "";
         String SOAPVarNames = "";
