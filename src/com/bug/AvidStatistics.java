@@ -60,21 +60,6 @@ public class AvidStatistics {
         JSONObject gen = config.getJSONObject("General");
         StreamSource source;
         StreamSource stylesource;
-        if (!gen.getJSONObject("smtp").getBoolean("auth")) {
-            ntf.setSMTP(
-                    gen.getJSONObject("smtp").getString("host"),
-                    gen.getJSONObject("smtp").getInt("port"),
-                    gen.getJSONObject("smtp").getBoolean("auth"), "", "", false);
-        } else {
-            ntf.setSMTP(
-                    gen.getJSONObject("smtp").getString("host"),
-                    gen.getJSONObject("smtp").getInt("port"),
-                    gen.getJSONObject("smtp").getBoolean("auth"),
-                    gen.getJSONObject("smtp").getString("user"),
-                    gen.getJSONObject("smtp").getString("pass"),
-                    gen.getJSONObject("smtp").getBoolean("tls")
-            );
-        }
 
         JSONObject act = null;
         JSONArray Actions = null;
@@ -85,7 +70,6 @@ public class AvidStatistics {
             Actions = config.getJSONArray("Action");
             actionCount = Actions.length();
         }
-        //System.out.println(config.get("Action").getClass().getCanonicalName());
         for (int i = 0; i < actionCount; i++) {
             if ("org.json.JSONArray".equals(config.get("Action").getClass().getCanonicalName())) {
                 act = Actions.getJSONObject(i);
@@ -95,56 +79,6 @@ public class AvidStatistics {
             Q.setAcceptEncoding(gen.getString("AvidWFE_AcceptEncoding"));
             Q.setContentType(gen.getString("AvidWFE_ContentType"));
             querylogic(gen, act, Q);
-            Object res = null;
-            engineJS = new ScriptEngineManager().getEngineByName("JavaScript");
-            JSONObject cf = null;
-            JSONArray cfa = null;
-            int cfCount = 1;
-            if ("org.json.JSONObject".equals(act.get("custFilterparam").getClass().getCanonicalName())) {
-                cf = act.getJSONObject("custFilterparam");
-            } else {
-                cfa = act.getJSONArray("custFilterparam");
-                cfCount = cfa.length();
-            }
-            for (int ix = 0; ix < Q.wfData.size(); ix++) {
-                String boolleanEval = "";
-                for (int ii = 0; ii < cfCount; ii++) {
-                    if ("org.json.JSONArray".equals(act.get("custFilterparam").getClass().getCanonicalName())) {
-                        cf = cfa.getJSONObject(ii);
-                        engineJS.eval("cf_" + cf.getString("prefix") + "_" + cf.getString("name") + "=\"" + replaceEscapeChar(cf.get("value").toString()) + "\"");
-                        engineJS.eval(cf.getString("prefix") + "_" + cf.getString("name") + "=\"" + replaceEscapeChar((String) Q.wfData.get(ix).get(cf.getString("prefix") + "_" + cf.getString("name"))) + "\"");
-                        if (cf.getString("logic").matches(".*like.*")) {
-                            //System.out.println("Val_" + ii + "=" + cf.getString("prefix") + "_" + cf.getString("name") + ".match(" + "cf_" + cf.getString("prefix") + "_" + cf.getString("name") + ")!=null");
-                            engineJS.eval("Val_" + ii + "=" + cf.getString("prefix") + "_" + cf.getString("name") + ".match(" + "cf_" + cf.getString("prefix") + "_" + cf.getString("name") + ")!=null");
-                        } else {
-                            engineJS.eval("Val_" + ii + "=" + "cf_" + cf.getString("prefix") + "_" + cf.getString("name") + "==" + cf.getString("prefix") + "_" + cf.getString("name"));
-                        }
-                        boolleanEval += cf.getString("logic") + "Val_" + ii;
-                    }
-                }
-                res = engineJS.eval(replaceLogic(boolleanEval));
-                if (res == null || (Boolean) res) {
-                    reportIndexes.add(ix);
-                }
-            }
-            try {
-                if (!(act.get("report").getClass().getCanonicalName()).isEmpty()) {
-                    System.setProperty("javax.xml.transform.TransformerFactory", "net.sf.saxon.TransformerFactoryImpl");
-                    source = new StreamSource(new ByteArrayInputStream(createXmlReport(Q.wfData, reportIndexes).getBytes()));
-                    stylesource = new StreamSource("./reportWFtemplate.xsl");
-                    TransformerFactory factory = TransformerFactory.newInstance();
-                    Transformer transformer = factory.newTransformer(stylesource);
-                    StreamResult result = new StreamResult("./report_" + dateFormat.format(new Date()) + ".xml");
-                    transformer.transform(source, result);
-                }
-            } catch (Exception e) {
-                System.err.println("Error: 0x01-Error generate report." );
-            }
-            try (PrintStream out = new PrintStream(new FileOutputStream("lastCheckTime.dt"))) {
-                out.print(dateFormat.format(lastCheck));
-            } catch (Exception e) {
-                System.err.println("Error: 0x02-Error create file datestamp." );
-            }
         }
     }
 

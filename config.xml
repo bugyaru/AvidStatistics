@@ -5,7 +5,6 @@
 		<AvidWFE_Url>http://10.2.68.187:9900/WorkflowEngineWS_1/WFE.asmx</AvidWFE_Url>
 		<AvidWFE_AcceptEncoding>gzip,deflate</AvidWFE_AcceptEncoding>
 		<AvidWFE_ContentType>text/xml;charset=UTF8</AvidWFE_ContentType>
-		<smtp host="smtp.tvc.local" port="25" auth="false" tls="false" user="" pass="" />
                 <SOAPFilter SearchTag="workflowEngine_GetWorkflowsResult" SearchTagChild="WorkflowInfo" TagPrefix="SOAPFilter" />
                 <SOAPNames SearchTag="workflowEngine_GetVariableNameArrayListFromJobIDResponse" SearchTagChild="workflowEngine_GetVariableNameArrayListFromJobIDResult" TagPrefix="SOAPData" />
                 <SOAPValues SearchTag="workflowEngine_GetVariableValueArrayListFromJobIDResponse" SearchTagChild="workflowEngine_GetVariableValueArrayListFromJobIDResult" TagPrefix="SOAPData" />
@@ -34,35 +33,5 @@
 			  </wfe:workflowEngine_GetVariableValueArrayListFromJobID>
 			]]>
 		</SOAPValues>
-		<custFilterparam logic="(" prefix="SOAPFilter" name="lastError" value="979"/>
-		<custFilterparam logic="{and}{like}" prefix="SOAPFilter" name="errorMessage" value="not in House format"/>
-		<notify type="xml" outpath="./" xslt="" filename="{SOAPFilter_id}.xml" fullpathregex="" fullpachreplacement=""/>
-		<!--notify type="mail" sendto="bug-b@tvc.ru" recepient="bug-b@tvc.ru" subject="test">HI!</notify-->
-		<notify type="mail" sendto="bug-b@ya.ru" recepient="bug-b@ya.ru" subject="test">HI!</notify>
-		<notify />
-		<command type="exec" cmd="" param="" />
-		<command type="script" cmd="" name="" param="" />
-	</Action>
-	<Action>
-		<SOAPFilter action="http://www.blue-order.com/ma/workflowenginews/wfe/workflowEngine_GetWorkflows">
-                    <![CDATA[
-                        <wfe:workflowEngine_GetWorkflows>
-                            <wfe:type>TVC_IMPORT_VIDEO_PreProcess</wfe:type>
-                            <wfe:status>4</wfe:status>
-                            <!--wfe:minStartTime>{lastCheckTime}</wfe:minStartTime>
-                            <wfe:maxStartTime>{currentTime}</wfe:maxStartTime-->
-                            <wfe:maxHits>1000</wfe:maxHits>
-                        </wfe:workflowEngine_GetWorkflows>
-                    ]]>
-		</SOAPFilter>
-		<!--custFilterparam answer="SOAPFilter" name="lastError" value="979"/-->
-		<custFilterparam logic="" name="" value=""/>
-		<notify type="mail" sendto="supporttv@tvc.ru" recepient="AvidNotifier" subject="New Error on file: {SOAPFilter_userGuid} in jobID: {SOAPFilter_id}"><![CDATA[
-JobID: {SOAPFilter_id}
-File: {SOAPFilter_userGuid}
-Job Type: {SOAPFilter_type}
-Error Message: {SOAPFilter_errorMessage}]]>                
-                </notify>
-                <report />
 	</Action>
 </Config>
