@@ -48,15 +48,8 @@ public class AvidStatistics {
     public static void main(String[] args) throws UnsupportedEncodingException, ScriptException, TransformerConfigurationException, TransformerException, FileNotFoundException {
         Date lastCheck = new Date();
         SOAPquery Q = null;
-        command cmd = new command();
-        notify ntf = new notify();
-        ArrayList<Integer> reportIndexes = new ArrayList<Integer>();
-        ScriptEngine engineJS = null;
         JSONObject config = getGfg(args);
         JSONObject gen = config.getJSONObject("General");
-        StreamSource source;
-        StreamSource stylesource;
-
         JSONObject act = null;
         JSONArray Actions = null;
         int actionCount = 1;
