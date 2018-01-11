@@ -6,12 +6,9 @@
 package com.bug;
 
 import java.beans.XMLEncoder;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
@@ -24,7 +21,6 @@ import org.w3c.dom.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
